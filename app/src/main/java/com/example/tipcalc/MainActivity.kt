@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -74,7 +75,18 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             Text("Количество блюд: ", fontSize = 16.sp)
             OutlinedTextField(
                 value = dishesCount,
-                onValueChange = { dishesCount = it },
+                onValueChange = { input ->
+                    dishesCount = input
+                    // Автоматический выбор скидки
+                    val count = input.toIntOrNull() ?: 0
+                    selectedDiscount = when {
+                        count in 1..2 -> 3
+                        count in 3..5 -> 5
+                        count in 6..10 -> 7
+                        count > 10 -> 10
+                        else -> 3 // По умолчанию
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 label = { Text("шт") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -109,6 +121,17 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                 }
             }
         }
+        // Итоговый расчёт
+        val sum = orderSum.toDoubleOrNull() ?: 0.0
+        val tip = sum * (tipPercent / 100.0)
+        val discount = sum * (selectedDiscount / 100.0)
+        val total = sum + tip - discount
+
+        Text(
+            text = "Итого: ${"%.2f".format(total)} ₽",
+            fontSize = 24.sp,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
